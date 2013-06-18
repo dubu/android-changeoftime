@@ -1,19 +1,19 @@
 package com.change.time.dubu.android_changeoftime;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.dubu.android_changeoftime.R;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
+import java.util.*;
 
 public class MyActivity extends Activity {
     public enum Changes {
@@ -278,27 +278,40 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        /*
+        // flash
+        Camera mycam = Camera.open();
+        Camera.Parameters p = mycam.getParameters();
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        mycam.setParameters(p);
+        //time passes
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        mycam.setParameters(p);
+        mycam.release();
+        */
+
+        int icon = android.R.drawable.ic_menu_day; // 아이콘을 지정
+        CharSequence tickerText = "Hello C"; // 티커 메시지
+        long when = System.currentTimeMillis(); // 노티피케이션의 시간을 지정
+        Context context = getApplicationContext(); // 어플리케이션의 컨텍스트를 얻음
+        CharSequence contentTitle = "My Change notification"; // 타이틀 메시지
+        CharSequence contentText = "Hello Change!"; // 텍스트 메시지
+        //Intent notificationIntent = new Intent(this, Chap8RedActivity.class);
+        //PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        // 노티피케이션을 초기화 하고, 노티피케이션 사용을 위해 설정
+        Notification notification = new Notification(icon, tickerText, when);
+        notification.setLatestEventInfo(context, contentTitle, contentText,
+                null);
+        NotificationManager notificationManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
+
         txtTime = (TextView) findViewById(R.id.txt_time);
         txtDesc = (TextView) findViewById(R.id.txt_desc);
         //btnTime = (Button) findViewById(R.id.btn_time);
         dayPoint = (ImageView) findViewById(R.id.img_daypoint);
         hourPoint = (ImageView) findViewById(R.id.img_timepoint);
         secPoint = (ImageView) findViewById(R.id.img_sec);
-
-        // point.setRotation(90);
-        //point.setRotation(180);
-        // point.setRotation(270);
-        // point.setRotation(360);
-
-        /*
-        btnTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int dgree = Integer.valueOf(txtTime.getText().toString());
-                hourPoint.setRotation(-dgree);
-            }
-        });
-        */
 
         mRunnable = new Runnable() {
             @Override
@@ -384,6 +397,7 @@ public class MyActivity extends Activity {
         int dayOfYear = today.get(today.DAY_OF_YEAR);
         int minOfDay = cal.get(Calendar.HOUR_OF_DAY) * MinOfHour + cal.get(Calendar.MINUTE);
         int secOfMin = cal.get(Calendar.SECOND);
+        int dayHour =  cal.get(Calendar.HOUR_OF_DAY);
 
         int dayDegree = 360 * (dayOfYear+8) / 365 ;
         int hourDegree = 360 * minOfDay / 1440;
@@ -401,6 +415,24 @@ public class MyActivity extends Activity {
         txtTime.setText(timeStr);
         txtDesc.setText(Changes.findName(cName).desc);
         mHandler.postDelayed(mRunnable, 500);
+
+        if(minOfDay%2 == 1 &&cal.get(Calendar.MINUTE) == 0 && cal.get ( Calendar.SECOND ) ==0 ){
+            if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
+            if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
+            if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
+        }
+        if(dayHour%2 == 1 && cal.get(Calendar.MINUTE) == 0  ){
+            unlockScreen();
+        }
+    }
+
+    private void vibrationFire(int i) {
+        Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        List<long[]> pats = new ArrayList<long[]>();
+        pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
+        pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
+        pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
+        vibe.vibrate(pats.get(i), -1);
     }
 
     @Override
@@ -429,5 +461,12 @@ public class MyActivity extends Activity {
         }else{
             return "001";
         }
+    }
+
+    private void unlockScreen() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
+        wl.acquire();
+        wl.release();
     }
 }
