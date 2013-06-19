@@ -1,13 +1,10 @@
 package com.change.time.dubu.android_changeoftime;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
+import android.app.*;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.Vibrator;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -290,6 +287,17 @@ public class MyActivity extends Activity {
         mycam.release();
         */
 
+        Intent intent = new Intent(getApplicationContext(), AlramActivity.class);
+        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        PendingIntent sender = PendingIntent.getActivity(getApplicationContext(), 0, intent, 1);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.get ( Calendar.HOUR_OF_DAY )+1);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() , AlarmManager.INTERVAL_HOUR, sender);
+
+        /*
         int icon = android.R.drawable.ic_menu_day; // 아이콘을 지정
         CharSequence tickerText = "Hello C"; // 티커 메시지
         long when = System.currentTimeMillis(); // 노티피케이션의 시간을 지정
@@ -305,6 +313,7 @@ public class MyActivity extends Activity {
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, notification);
+        */
 
         txtTime = (TextView) findViewById(R.id.txt_time);
         txtDesc = (TextView) findViewById(R.id.txt_desc);
@@ -416,23 +425,6 @@ public class MyActivity extends Activity {
         txtDesc.setText(Changes.findName(cName).desc);
         mHandler.postDelayed(mRunnable, 500);
 
-        if(minOfDay%2 == 1 &&cal.get(Calendar.MINUTE) == 0 && cal.get ( Calendar.SECOND ) ==0 ){
-            if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
-            if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
-            if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
-        }
-        if(dayHour%2 == 1 && cal.get(Calendar.MINUTE) == 0  ){
-            unlockScreen();
-        }
-    }
-
-    private void vibrationFire(int i) {
-        Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        List<long[]> pats = new ArrayList<long[]>();
-        pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
-        pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
-        pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
-        vibe.vibrate(pats.get(i), -1);
     }
 
     @Override
@@ -463,10 +455,4 @@ public class MyActivity extends Activity {
         }
     }
 
-    private void unlockScreen() {
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
-        wl.acquire();
-        wl.release();
-    }
 }
