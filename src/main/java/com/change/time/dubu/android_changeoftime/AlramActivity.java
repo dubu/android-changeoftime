@@ -1,11 +1,19 @@
 package com.change.time.dubu.android_changeoftime;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+import com.dubu.android_changeoftime.R;
 
 import java.util.*;
 
@@ -14,30 +22,52 @@ import java.util.*;
  * Date: 13. 6. 20
  * Time: 오전 12:21
  */
-public class AlramActivity  extends Activity {
+public class AlramActivity extends Activity {
 
+    private Handler mHandler;
+    private Runnable mRunnable;
+
+    /**
+     * Called when the activity is first created.
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
 
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runTime();
+            }
+        };
+
+        mHandler = new Handler();
+        mHandler.postDelayed(mRunnable, 5000);
+
+    }
+
+    private void runTime() {
         Calendar cal = Calendar.getInstance(Locale.KOREA);
         int dayHour =  cal.get(Calendar.HOUR_OF_DAY);
 
-        String timeStr =cal.get ( Calendar.YEAR ) + "년 " + ( cal.get ( Calendar.MONTH ) + 1 ) + "월 " + cal.get ( Calendar.DATE ) + "일 "
-                + cal.get ( Calendar.HOUR_OF_DAY ) + "시 " +cal.get ( Calendar.MINUTE ) + "분 " + cal.get ( Calendar.SECOND ) + "초 ";
-
-        Toast toast = Toast.makeText(getApplicationContext(),timeStr, Toast.LENGTH_SHORT);
-        toast.show();
-
+        mHandler.postDelayed(mRunnable, 5000);
         if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
+            //vibrationFire(2);
             if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
             if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
             if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
         }
-
-        if(dayHour%2 == 1 && cal.get(Calendar.MINUTE) == 0  ){
-            unlockScreen();
+        if(cal.get(Calendar.MINUTE) != 0  ){
+            finish();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i("test", "onDstory()");
+        mHandler.removeCallbacks(mRunnable);
+        super.onDestroy();
     }
 
     private void vibrationFire(int i) {
@@ -47,6 +77,7 @@ public class AlramActivity  extends Activity {
         pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
         pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
         vibe.vibrate(pats.get(i), -1);
+        unlockScreen();       // screen on!!
     }
 
     private void unlockScreen() {

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -292,7 +294,7 @@ public class MyActivity extends Activity {
         PendingIntent sender = PendingIntent.getActivity(getApplicationContext(), 0, intent, 1);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get ( Calendar.HOUR_OF_DAY )+1);
+        calendar.set(Calendar.HOUR_OF_DAY, (calendar.get(Calendar.HOUR_OF_DAY)+1) );
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() , AlarmManager.INTERVAL_HOUR, sender);
@@ -425,6 +427,18 @@ public class MyActivity extends Activity {
         txtDesc.setText(Changes.findName(cName).desc);
         mHandler.postDelayed(mRunnable, 500);
 
+        if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
+            //if(cal.get(Calendar.MINUTE) == 0  ){
+            if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
+            if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
+            if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
+        }
+
+        if(dayHour%2 == 1 && cal.get(Calendar.MINUTE) == 0  ){
+            //if(cal.get(Calendar.MINUTE) == 0  ){
+            unlockScreen();
+        }
+
     }
 
     @Override
@@ -453,6 +467,22 @@ public class MyActivity extends Activity {
         }else{
             return "001";
         }
+    }
+
+    private void vibrationFire(int i) {
+        Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        List<long[]> pats = new ArrayList<long[]>();
+        pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
+        pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
+        pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
+        vibe.vibrate(pats.get(i), -1);
+    }
+
+    private void unlockScreen() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
+        wl.acquire();
+        wl.release();
     }
 
 }
