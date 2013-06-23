@@ -266,9 +266,6 @@ public class MyActivity extends Activity {
     static ImageView hourPoint;
     static ImageView dayPoint;
 
-    private Handler mHandler;
-    private Runnable mRunnable;
-
     /**
      * Called when the activity is first created.
      */
@@ -297,7 +294,7 @@ public class MyActivity extends Activity {
         calendar.set(Calendar.HOUR_OF_DAY, (calendar.get(Calendar.HOUR_OF_DAY)+1) );
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() , AlarmManager.INTERVAL_HOUR, sender);
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, sender);
 
         /*
         int icon = android.R.drawable.ic_menu_day; // 아이콘을 지정
@@ -323,16 +320,6 @@ public class MyActivity extends Activity {
         dayPoint = (ImageView) findViewById(R.id.img_daypoint);
         hourPoint = (ImageView) findViewById(R.id.img_timepoint);
         secPoint = (ImageView) findViewById(R.id.img_sec);
-
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                runTime();
-            }
-        };
-
-        mHandler = new Handler();
-        mHandler.postDelayed(mRunnable, 500);
 
         Changes.P001010.desc = "수산건 , 힘든 상황인데 용쓰는 모양. 안쓰럽네. 달리려하나 다리가 말을 듣지 않는다. 절름발이 상태.";
         Changes.P100110.desc = "택뢰수 , 따를 수. 선순환. 벼락이 치다. 벼락이 구름되어 다욱 구름이 많아지고 있는 모양. 잘되어 가고 있다. 선순환, 수필";
@@ -425,26 +412,14 @@ public class MyActivity extends Activity {
         timeStr = timeStr + Changes.findName(cName).desc.substring(0,4);
         txtTime.setText(timeStr);
         txtDesc.setText(Changes.findName(cName).desc);
-        mHandler.postDelayed(mRunnable, 500);
 
-        if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
-            //if(cal.get(Calendar.MINUTE) == 0  ){
-            if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
-            if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
-            if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
-        }
-
-        if(dayHour%2 == 1 && cal.get(Calendar.MINUTE) == 0  ){
-            //if(cal.get(Calendar.MINUTE) == 0  ){
-            unlockScreen();
-        }
 
     }
 
     @Override
     protected void onDestroy() {
         Log.i("test", "onDstory()");
-        mHandler.removeCallbacks(mRunnable);
+        //mHandler.removeCallbacks(mRunnable);
         super.onDestroy();
     }
 
@@ -468,21 +443,4 @@ public class MyActivity extends Activity {
             return "001";
         }
     }
-
-    private void vibrationFire(int i) {
-        Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        List<long[]> pats = new ArrayList<long[]>();
-        pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
-        pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
-        pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
-        vibe.vibrate(pats.get(i), -1);
-    }
-
-    private void unlockScreen() {
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
-        wl.acquire();
-        wl.release();
-    }
-
 }

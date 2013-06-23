@@ -43,7 +43,14 @@ public class AlramActivity extends Activity {
         };
 
         mHandler = new Handler();
-        mHandler.postDelayed(mRunnable, 5000);
+        mHandler.postDelayed(mRunnable, 10000);
+
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runTime();
+            }
+        };
 
     }
 
@@ -51,16 +58,21 @@ public class AlramActivity extends Activity {
         Calendar cal = Calendar.getInstance(Locale.KOREA);
         int dayHour =  cal.get(Calendar.HOUR_OF_DAY);
 
-        mHandler.postDelayed(mRunnable, 5000);
+        mHandler.postDelayed(mRunnable, 10000);
         if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
-            //vibrationFire(2);
             if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
             if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
             if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
         }
+
+        if(dayHour%2 == 0 &&cal.get(Calendar.MINUTE) == 0  ){
+            unlockScreen();
+        }
+
         if(cal.get(Calendar.MINUTE) != 0  ){
             finish();
         }
+
     }
 
     @Override
@@ -74,7 +86,7 @@ public class AlramActivity extends Activity {
         Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         List<long[]> pats = new ArrayList<long[]>();
         pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
-        pats.add(new long[]{500L, 500L,500L, 500L,500L, 500L});
+        pats.add(new long[]{1000, 200, 1000, 2000, 1200});
         pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
         vibe.vibrate(pats.get(i), -1);
         unlockScreen();       // screen on!!
