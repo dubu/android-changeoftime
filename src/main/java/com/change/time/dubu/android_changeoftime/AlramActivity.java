@@ -26,6 +26,7 @@ public class AlramActivity extends Activity {
 
     private Handler mHandler;
     private Runnable mRunnable;
+    private Runnable mRunnableUnlock;
 
     /**
      * Called when the activity is first created.
@@ -42,43 +43,49 @@ public class AlramActivity extends Activity {
             }
         };
 
-        mHandler = new Handler();
-        mHandler.postDelayed(mRunnable, 10000);
-
-        mRunnable = new Runnable() {
+        mRunnableUnlock= new Runnable() {
             @Override
             public void run() {
-                runTime();
+                runTimeUnlock();
             }
         };
 
+        mHandler = new Handler();
+        mHandler.postDelayed(mRunnable, 1000);
+        mHandler.postDelayed(mRunnableUnlock, 2000);
+
+    }
+
+    private void runTimeUnlock() {
+        mHandler.postDelayed(mRunnableUnlock, 500);
+        Calendar cal = Calendar.getInstance(Locale.KOREA);
+        if(cal.get(Calendar.MINUTE) == 0  ){
+            unlockScreen();
+        }else{
+            finish();
+        }
     }
 
     private void runTime() {
+        mHandler.postDelayed(mRunnable, 10000);
         Calendar cal = Calendar.getInstance(Locale.KOREA);
         int dayHour =  cal.get(Calendar.HOUR_OF_DAY);
-
-        mHandler.postDelayed(mRunnable, 10000);
         if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
             if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
             if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
             if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
         }
 
-        if(dayHour%2 == 0 &&cal.get(Calendar.MINUTE) == 0  ){
-            unlockScreen();
-        }
-
         if(cal.get(Calendar.MINUTE) != 0  ){
             finish();
         }
-
     }
 
     @Override
     protected void onDestroy() {
         Log.i("test", "onDstory()");
         mHandler.removeCallbacks(mRunnable);
+        mHandler.removeCallbacks(mRunnableUnlock);
         super.onDestroy();
     }
 
@@ -89,7 +96,7 @@ public class AlramActivity extends Activity {
         pats.add(new long[]{1000, 200, 1000, 2000, 1200});
         pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
         vibe.vibrate(pats.get(i), -1);
-        unlockScreen();       // screen on!!
+             // screen on!!
     }
 
     private void unlockScreen() {
