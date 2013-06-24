@@ -15,6 +15,13 @@
         <activity
                 android:name="com.change.time.dubu.android_changeoftime.AlramActivity">
         </activity>
+        <service android:name="com.change.time.dubu.android_changeoftime.AlramService">
+            <intent-filter>
+
+                <action android:name="com.change.time.dubu.android_changeoftime"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
     </application>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

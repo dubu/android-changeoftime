@@ -24,10 +24,6 @@ import java.util.*;
  */
 public class AlramActivity extends Activity {
 
-    private Handler mHandler;
-    private Runnable mRunnable;
-    private Runnable mRunnableUnlock;
-
     /**
      * Called when the activity is first created.
      */
@@ -35,74 +31,13 @@ public class AlramActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                runTime();
-            }
-        };
-
-        mRunnableUnlock= new Runnable() {
-            @Override
-            public void run() {
-                runTimeUnlock();
-            }
-        };
-
-        mHandler = new Handler();
-        mHandler.postDelayed(mRunnable, 1000);
-        mHandler.postDelayed(mRunnableUnlock, 2000);
-
-    }
-
-    private void runTimeUnlock() {
-        mHandler.postDelayed(mRunnableUnlock, 500);
-        Calendar cal = Calendar.getInstance(Locale.KOREA);
-        if(cal.get(Calendar.MINUTE) == 0  ){
-            unlockScreen();
-        }else{
-            finish();
-        }
-    }
-
-    private void runTime() {
-        mHandler.postDelayed(mRunnable, 10000);
-        Calendar cal = Calendar.getInstance(Locale.KOREA);
-        int dayHour =  cal.get(Calendar.HOUR_OF_DAY);
-        if(dayHour%2 == 1 &&cal.get(Calendar.MINUTE) == 0  ){
-            if(dayHour == 23 ||dayHour == 5 ||dayHour == 11 ||dayHour == 17) vibrationFire(0);
-            if(dayHour == 1 ||dayHour == 7  ||dayHour == 13 ||dayHour == 19) vibrationFire(1);
-            if(dayHour == 3 ||dayHour == 9  ||dayHour == 15 ||dayHour == 21) vibrationFire(2);
-        }
-
-        if(cal.get(Calendar.MINUTE) != 0  ){
-            finish();
-        }
+        startService(new Intent("com.change.time.dubu.android_changeoftime"));
+        finish();
     }
 
     @Override
     protected void onDestroy() {
-        Log.i("test", "onDstory()");
-        mHandler.removeCallbacks(mRunnable);
-        mHandler.removeCallbacks(mRunnableUnlock);
         super.onDestroy();
     }
 
-    private void vibrationFire(int i) {
-        Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        List<long[]> pats = new ArrayList<long[]>();
-        pats.add(new long[]{1000L, 1000L,1000L, 1000L,1000L,1000L});
-        pats.add(new long[]{1000, 200, 1000, 2000, 1200});
-        pats.add(new long[]{250L, 250L,250L, 250L,250L,250L, 250L});
-        vibe.vibrate(pats.get(i), -1);
-             // screen on!!
-    }
-
-    private void unlockScreen() {
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
-        wl.acquire();
-        wl.release();
-    }
 }

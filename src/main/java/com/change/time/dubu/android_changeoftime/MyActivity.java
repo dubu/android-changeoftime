@@ -266,6 +266,10 @@ public class MyActivity extends Activity {
     static ImageView hourPoint;
     static ImageView dayPoint;
 
+    private Handler mHandler;
+    private Runnable mRunnable;
+
+
     /**
      * Called when the activity is first created.
      */
@@ -320,6 +324,17 @@ public class MyActivity extends Activity {
         dayPoint = (ImageView) findViewById(R.id.img_daypoint);
         hourPoint = (ImageView) findViewById(R.id.img_timepoint);
         secPoint = (ImageView) findViewById(R.id.img_sec);
+
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runTime();
+            }
+        };
+
+        mHandler = new Handler();
+        mHandler.postDelayed(mRunnable, 500);
+
 
         Changes.P001010.desc = "수산건 , 힘든 상황인데 용쓰는 모양. 안쓰럽네. 달리려하나 다리가 말을 듣지 않는다. 절름발이 상태.";
         Changes.P100110.desc = "택뢰수 , 따를 수. 선순환. 벼락이 치다. 벼락이 구름되어 다욱 구름이 많아지고 있는 모양. 잘되어 가고 있다. 선순환, 수필";
@@ -412,7 +427,7 @@ public class MyActivity extends Activity {
         timeStr = timeStr + Changes.findName(cName).desc.substring(0,4);
         txtTime.setText(timeStr);
         txtDesc.setText(Changes.findName(cName).desc);
-
+        mHandler.postDelayed(mRunnable, 500);
 
     }
 
